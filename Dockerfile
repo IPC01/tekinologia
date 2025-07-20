@@ -1,7 +1,7 @@
-# 1. Imagem base: PHP 8.2 com Apache pré-instalado
+# 1. Imagem base: PHP 8.2 com Apache
 FROM php:8.2-apache
 
-# 2. Atualiza lista de pacotes e instala dependências necessárias para Laravel e SQLite
+# 2. Atualiza lista de pacotes e instala dependências necessárias para Laravel, SQLite e extensões PHP essenciais
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -11,32 +11,37 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libsqlite3-dev \
-    && docker-php-ext-install pdo pdo_sqlite zip \
+    pkg-config \
+    libssl-dev \
+    && docker-php-ext-install pdo pdo_sqlite zip mbstring tokenizer xml xmlwriter \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 3. Copia o Composer (gerenciador de dependências PHP) da imagem oficial do Composer para dentro da imagem
+# 3. Copia o Composer da imagem oficial para o container
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 4. Copia todo o código da aplicação para a pasta padrão do Apache dentro do container
+# 4. Copia o código do projeto para o diretório padrão do Apache
 COPY . /var/www/html
 
-# 5. Define que a pasta padrão onde o container vai trabalhar é essa
+# 5. Define o diretório de trabalho
 WORKDIR /var/www/html
 
-# 6. Ajusta permissões para que o servidor web possa acessar os arquivos e ativa o módulo rewrite do Apache (necessário para Laravel)
+# 6. Ajusta permissões para o servidor web e habilita mod_rewrite
 RUN chown -R www-data:www-data /var/www/html \
     && a2enmod rewrite
 
-# 7. Cria o arquivo do banco SQLite, caso não exista (evita erro)
+# 7. Cria o arquivo do banco SQLite, caso não exista
 RUN mkdir -p database && touch database/database.sqlite
 
-# 8. Dá permissões corretas para as pastas usadas para cache e armazenamento no Laravel
+# 8. Ajusta permissões para storage, cache e database
 RUN chmod -R 775 storage bootstrap/cache database
 
-# 9. Instala as dependências PHP do Laravel sem os pacotes de desenvolvimento, otimiza o autoload, limpa cache de configuração e gera a chave da aplicação
+# 9. Se o arquivo .env não existir, cria copiando o exemplo
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
+# 10. Instala dependências do Laravel, limpa cache e gera a chave da aplicação
 RUN composer install --no-dev --optimize-autoloader \
     && php artisan config:clear \
     && php artisan key:generate
 
-# 10. Expõe a porta 80, que é a padrão do Apache, para acessar externamente
+# 11. Expõe a porta 80 para acesso HTTP
 EXPOSE 80
