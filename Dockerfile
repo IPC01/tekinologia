@@ -1,3 +1,7 @@
+# Etapa base do PHP com Apache
+FROM php:8.2-apache
+
+# Instala dependências do sistema
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     libzip-dev \
