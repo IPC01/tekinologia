@@ -12,7 +12,7 @@ use App\Http\Controllers\FinanceController;
 
 
 
-Route::get('/',[FrontendController::class, 'index']);
+Route::get('/',[FrontendController::class, 'index'])->name('frontend.index');
 Route::get('/shop',[FrontendController::class, 'shop'])->name('frontend.shop');
 Route::get('/about',[FrontendController::class, 'about'])->name('frontend.about');
 

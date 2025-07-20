@@ -34,8 +34,11 @@
                 </p>
 
                 <p class="text-gray-700 dark:text-gray-300 mb-4">
-                    Cada transação realizada está sujeita a uma comissão automática de <strong
-                        class="text-blue-600">{{ $setting->commission_rate }}%</strong>,
+                    Cada transação realizada está sujeita a uma comissão automática de
+                    <strong class="text-blue-600">
+                        {{ $setting->commission_rate ?? 'indefinido' }}%
+                    </strong>
+
                     destinada à manutenção e desenvolvimento da plataforma.
                 </p>
 

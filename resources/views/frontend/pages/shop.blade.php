@@ -392,7 +392,7 @@
     </div>
 
   <script>
-    const commissionRate = parseFloat("{{ $settings->commission_rate }}") / 100;
+const commissionRate = parseFloat("{{ $settings->commission_rate ?? 100 }}") / 100;
     console.log('comissão da empresa:', commissionRate);
 
     function openPurchaseModal(productId, originalPrice, discountedPrice) {

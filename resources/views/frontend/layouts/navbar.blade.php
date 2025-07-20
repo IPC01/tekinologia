@@ -1,7 +1,7 @@
 <header class="bg-white dark:bg-gray-900 shadow">
     <nav class="container mx-auto px-4 py-3 flex items-center justify-between">
         <!-- Logo -->
-        <div class="logo font-bold text-xl text-[#5855eb]">TEKINOLOGIA</div>
+        <div class="logo font-bold text-xl text-[#5855eb]"><a href="{{route('frontend.index')}}">TEKINOLOGIA</a></div>
 
         <!-- Navegação -->
    <ul class="nav-links flex space-x-6">
