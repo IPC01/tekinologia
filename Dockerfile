@@ -2,21 +2,22 @@
 FROM php:8.2-apache
 
 # Instala dependências do sistema
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    libzip-dev \
+RUN apt-get update && apt-get install -y \
     unzip \
     zip \
     git \
     curl \
     libonig-dev \
     libxml2-dev \
+    libzip-dev \
     libsqlite3-dev \
-    sqlite3 \
-    && docker-php-ext-install pdo pdo_sqlite zip mbstring tokenizer xml \
-    && a2enmod rewrite \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    sqlite3
 
+RUN docker-php-ext-install pdo pdo_sqlite zip mbstring tokenizer xml
+
+RUN a2enmod rewrite
+
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Instala o Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
