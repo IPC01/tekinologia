@@ -3,15 +3,16 @@ FROM php:8.2-apache
 
 # 2. Atualiza lista de pacotes e instala dependências necessárias para Laravel e SQLite
 RUN apt-get update && apt-get install -y \
-    git \                # para controle de versão (opcional)
-    unzip \              # para descompactar arquivos
-    curl \               # para baixar arquivos via linha de comando
-    libzip-dev \         # biblioteca para zip, usada pelo PHP
-    libonig-dev \        # biblioteca para suporte a expressões regulares UTF-8 (mbstring)
-    libxml2-dev \        # biblioteca XML, usada por várias extensões PHP
-    zip \                # utilitário zip
-    && docker-php-ext-install pdo pdo_sqlite zip \  # ativa extensões PHP para SQLite e zip
-    && apt-get clean && rm -rf /var/lib/apt/lists/* # limpa cache do apt para reduzir o tamanho da imagem
+    git \
+    unzip \
+    zip \
+    curl \
+    libzip-dev \
+    libonig-dev \
+    libxml2-dev \
+    libsqlite3-dev \
+    && docker-php-ext-install pdo pdo_sqlite zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 3. Copia o Composer (gerenciador de dependências PHP) da imagem oficial do Composer para dentro da imagem
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
