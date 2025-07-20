@@ -1,37 +1,41 @@
-# Imagem base com PHP, Apache e extensões comuns
+# 1. Imagem base: PHP 8.2 com Apache pré-instalado
 FROM php:8.2-apache
 
-# Instalar dependências necessárias
+# 2. Atualiza lista de pacotes e instala dependências necessárias para Laravel e SQLite
 RUN apt-get update && apt-get install -y \
-    git unzip curl libzip-dev libonig-dev libxml2-dev \
-    && docker-php-ext-install pdo pdo_sqlite zip
+    git \                # para controle de versão (opcional)
+    unzip \              # para descompactar arquivos
+    curl \               # para baixar arquivos via linha de comando
+    libzip-dev \         # biblioteca para zip, usada pelo PHP
+    libonig-dev \        # biblioteca para suporte a expressões regulares UTF-8 (mbstring)
+    libxml2-dev \        # biblioteca XML, usada por várias extensões PHP
+    zip \                # utilitário zip
+    && docker-php-ext-install pdo pdo_sqlite zip \  # ativa extensões PHP para SQLite e zip
+    && apt-get clean && rm -rf /var/lib/apt/lists/* # limpa cache do apt para reduzir o tamanho da imagem
 
-# Instalar Composer
+# 3. Copia o Composer (gerenciador de dependências PHP) da imagem oficial do Composer para dentro da imagem
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copiar o projeto Laravel
+# 4. Copia todo o código da aplicação para a pasta padrão do Apache dentro do container
 COPY . /var/www/html
 
-# Definir diretório de trabalho
+# 5. Define que a pasta padrão onde o container vai trabalhar é essa
 WORKDIR /var/www/html
 
-# Permitir que o Apache acesse os arquivos corretamente
+# 6. Ajusta permissões para que o servidor web possa acessar os arquivos e ativa o módulo rewrite do Apache (necessário para Laravel)
 RUN chown -R www-data:www-data /var/www/html \
     && a2enmod rewrite
 
-# Criar o banco SQLite se não existir
+# 7. Cria o arquivo do banco SQLite, caso não exista (evita erro)
 RUN mkdir -p database && touch database/database.sqlite
 
-# Configurar permissões
+# 8. Dá permissões corretas para as pastas usadas para cache e armazenamento no Laravel
 RUN chmod -R 775 storage bootstrap/cache database
 
-# Copiar o arquivo .env (caso queira copiar um de exemplo)
-# COPY .env.example .env
+# 9. Instala as dependências PHP do Laravel sem os pacotes de desenvolvimento, otimiza o autoload, limpa cache de configuração e gera a chave da aplicação
+RUN composer install --no-dev --optimize-autoloader \
+    && php artisan config:clear \
+    && php artisan key:generate
 
-# Rodar dependências Laravel e gerar chave
-RUN composer install --no-dev --optimize-autoloader && \
-    php artisan config:clear && \
-    php artisan key:generate
-
-# Expor a porta 80 (padrão do Apache)
+# 10. Expõe a porta 80, que é a padrão do Apache, para acessar externamente
 EXPOSE 80
